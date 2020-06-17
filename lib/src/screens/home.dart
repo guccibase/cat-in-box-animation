@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:catinboxanimaltion/src/widgets/cat.dart';
 import 'package:flutter/material.dart';
 
@@ -6,19 +8,49 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
+class _HomeState extends State<Home> with TickerProviderStateMixin {
   Animation<double> catAnimation;
   AnimationController catController;
+  Animation<double> flapAnimation;
+  AnimationController flapController;
 
   @override
   void initState() {
     super.initState();
 
-    catController =
-        AnimationController(duration: Duration(seconds: 1), vsync: this);
+    catController = AnimationController(
+      duration: Duration(
+        seconds: 1,
+      ),
+      vsync: this,
+    );
 
-    catAnimation = Tween(begin: -80.0, end: -35.0)
-        .animate(CurvedAnimation(parent: catController, curve: Curves.easeIn));
+    catAnimation = Tween(
+      begin: -80.0,
+      end: 0.0,
+    ).animate(
+      CurvedAnimation(
+        parent: catController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    flapController = AnimationController(
+      duration: Duration(
+        seconds: 1,
+      ),
+      vsync: this,
+    );
+
+    flapAnimation = Tween(
+      begin: pi * 0.6,
+      end: pi * 2,
+    ).animate(
+      CurvedAnimation(
+        parent: flapController,
+        curve: Curves.linear,
+      ),
+    );
   }
 
   @override
@@ -31,19 +63,16 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
         onTap: () {
           if (catController.isCompleted) {
             catController.reverse();
+            flapController.reverse();
           } else {
             catController.forward();
+            flapController.forward();
           }
         },
         child: Center(
           child: Stack(
             overflow: Overflow.visible,
             children: <Widget>[
-              Container(
-                color: Colors.brown,
-                height: 200,
-                width: 200,
-              ),
               AnimatedBuilder(
                 animation: catAnimation,
                 // ignore: missing_return
@@ -56,6 +85,13 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
                   );
                 },
               ),
+              Container(
+                color: Colors.brown,
+                height: 200,
+                width: 200,
+              ),
+              leftFlap(),
+              rightFlap()
             ],
           ),
         ),
@@ -65,5 +101,43 @@ class _HomeState extends State<Home> with SingleTickerProviderStateMixin {
 
   Widget buildAnimation() {
     return Cat();
+  }
+
+  Widget leftFlap() {
+    return Positioned(
+      left: 2,
+      child: AnimatedBuilder(
+          animation: flapAnimation,
+          builder: (context, child) {
+            return Transform.rotate(
+              child: Container(
+                height: 10.0,
+                width: 125.0,
+                color: Colors.brown,
+              ),
+              angle: flapAnimation.value,
+              alignment: Alignment.topLeft,
+            );
+          }),
+    );
+  }
+
+  Widget rightFlap() {
+    return Positioned(
+      right: 2,
+      child: AnimatedBuilder(
+          animation: flapAnimation,
+          builder: (context, child) {
+            return Transform.rotate(
+              child: Container(
+                height: 10.0,
+                width: 125.0,
+                color: Colors.brown,
+              ),
+              angle: -flapAnimation.value,
+              alignment: Alignment.topRight,
+            );
+          }),
+    );
   }
 }
